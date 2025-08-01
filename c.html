@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数字组合查找器</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="file"], input[type="number"], textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            min-height: 50px;
+        }
+        .success {
+            color: #4CAF50;
+        }
+        .error {
+            color: #f44336;
+        }
+        .tab-container {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .tab {
+            padding: 10px 15px;
+            background-color: #e0e0e0;
+            cursor: pointer;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>数字组合查找器</h1>
+        
+        <div class="tab-container">
+            <div class="tab active" onclick="switchTab('fileTab')">上传文件</div>
+            <div class="tab" onclick="switchTab('pasteTab')">粘贴数据</div>
+        </div>
+        
+        <div id="fileTab" class="tab-content active">
+            <div class="form-group">
+                <label for="fileInput">上传数字文件（CSV/TXT/XLSX/XLS格式）：</label>
+                <input type="file" id="fileInput" accept=".csv,.txt,.xlsx,.xls">
+            </div>
+        </div>
+        
+        <div id="pasteTab" class="tab-content">
+            <div class="form-group">
+                <label for="pasteInput">直接粘贴数字（用逗号、空格或换行分隔）：</label>
+                <textarea id="pasteInput" placeholder="例如: 12.34, 56.78, 90.12 或每行一个数字"></textarea>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="target">目标结果：</label>
+            <input type="number" id="target" step="0.01" placeholder="输入目标金额">
+        </div>
+        
+        <div class="form-group">
+            <label for="depth">深度值（最多组合的数字个数，默认5）：</label>
+            <input type="number" id="depth" min="1" value="5">
+        </div>
+        
+        <button id="findBtn">查找组合</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('findBtn').addEventListener('click', findCombinations);
+        
+        function switchTab(tabId) {
+            // 隐藏所有标签内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 取消所有标签的活动状态
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 显示选定的标签内容
+            document.getElementById(tabId).classList.add('active');
+            
+            // 设置选定标签的活动状态
+            event.currentTarget.classList.add('active');
+        }
+        
+        function findCombinations() {
+            const target = parseFloat(document.getElementById('target').value);
+            const depth = parseInt(document.getElementById('depth').value) || 5;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = "处理中...";
+            
+            if (isNaN(target)) {
+                resultDiv.innerHTML = '<span class="error">请输入有效的目标金额</span>';
+                return;
+            }
+            
+            // 检查当前活动的标签
+            const activeTab = document.querySelector('.tab-content.active').id;
+            
+            if (activeTab === 'fileTab') {
+                processFile(target, depth, resultDiv);
+            } else {
+                processPaste(target, depth, resultDiv);
+            }
+        }
+        
+        function processFile(target, depth, resultDiv) {
+            const fileInput = document.getElementById('fileInput');
+            
+            if (!fileInput.files.length) {
+                resultDiv.innerHTML = '<span class="error">请先上传文件</span>';
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const fileType = file.name.split('.').pop().toLowerCase();
+            
+            if (['csv', 'txt'].includes(fileType)) {
+                processTextFile(file, target, depth, resultDiv);
+            } else if (['xlsx', 'xls'].includes(fileType)) {
+                processExcelFile(file, target, depth, resultDiv);
+            } else {
+                resultDiv.innerHTML = '<span class="error">不支持的文件格式</span>';
+            }
+        }
+        
+        function processTextFile(file, target, depth, resultDiv) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const numbers = parseNumbersFromText(content);
+                
+                if (numbers.length === 0) {
+                    resultDiv.innerHTML = '<span class="error">文件中没有找到有效的数字</span>';
+                    return;
+                }
+                
+                findAndDisplayCombinations(numbers, target, depth, resultDiv);
+            };
+            
+            reader.onerror = function() {
+                resultDiv.innerHTML = '<span class="error">读取文件时出错</span>';
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        function processExcelFile(file, target, depth, resultDiv) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const numbers = [];
+                    
+                    // 遍历所有工作表
+                    workbook.SheetNames.forEach(sheetName => {
+                        const worksheet = workbook.Sheets[sheetName];
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                        
+                        // 提取所有数字
+                        jsonData.forEach(row => {
+                            if (Array.isArray(row)) {
+                                row.forEach(cell => {
+                                    if (typeof cell === 'number') {
+                                        numbers.push(cell);
+                                    } else if (typeof cell === 'string' && !isNaN(parseFloat(cell))) {
+                                        numbers.push(parseFloat(cell));
+                                    }
+                                });
+                            }
+                        });
+                    });
+                    
+                    if (numbers.length === 0) {
+                        resultDiv.innerHTML = '<span class="error">Excel文件中没有找到有效的数字</span>';
+                        return;
+                    }
+                    
+                    findAndDisplayCombinations(numbers, target, depth, resultDiv);
+                } catch (error) {
+                    resultDiv.innerHTML = `<span class="error">解析Excel文件时出错: ${error.message}</span>`;
+                }
+            };
+            
+            reader.onerror = function() {
+                resultDiv.innerHTML = '<span class="error">读取文件时出错</span>';
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+        
+        function processPaste(target, depth, resultDiv) {
+            const pasteInput = document.getElementById('pasteInput').value.trim();
+            
+            if (!pasteInput) {
+                resultDiv.innerHTML = '<span class="error">请输入或粘贴数字</span>';
+                return;
+            }
+            
+            const numbers = parseNumbersFromText(pasteInput);
+            
+            if (numbers.length === 0) {
+                resultDiv.innerHTML = '<span class="error">没有找到有效的数字</span>';
+                return;
+            }
+            
+            findAndDisplayCombinations(numbers, target, depth, resultDiv);
+        }
+        
+        function parseNumbersFromText(text) {
+            // 替换所有非数字字符为空格，然后分割
+            const numbers = text
+                .replace(/[^\d.,-]/g, ' ') // 保留数字、小数点、逗号和负号
+                .replace(/,/g, ' ') // 将逗号替换为空格
+                .split(/\s+/) // 按空格或换行分割
+                .filter(item => item !== '') // 移除空项
+                .map(item => parseFloat(item)) // 转换为数字
+                .filter(num => !isNaN(num)); // 移除NaN
+            
+            return numbers;
+        }
+        
+        function findAndDisplayCombinations(numbers, target, depth, resultDiv) {
+            // 查找组合
+            const combinations = findSumCombinations(numbers, target, depth);
+            
+            // 去除重复的组合（顺序不同但数字相同）
+            const uniqueCombinations = removeDuplicateCombinations(combinations);
+            
+            // 显示结果
+            if (uniqueCombinations.length > 0) {
+                let html = `<p class="success">在 ${numbers.length} 个数字中找到 ${uniqueCombinations.length} 种组合：</p><ul>`;
+                uniqueCombinations.forEach(comb => {
+                    const sum = comb.reduce((a, b) => a + b, 0);
+                    html += `<li>${comb.join(' + ')} = ${sum.toFixed(2)}</li>`;
+                });
+                html += '</ul>';
+                resultDiv.innerHTML = html;
+            } else {
+                resultDiv.innerHTML = `<span class="error">在深度 ${depth} 内没有找到相加等于 ${target.toFixed(2)} 的组合</span>`;
+            }
+        }
+        
+        function findSumCombinations(numbers, target, maxDepth) {
+            const results = [];
+            
+            // 递归查找组合
+            function backtrack(start, path, currentSum, currentDepth) {
+                if (currentDepth > maxDepth) return;
+                
+                if (Math.abs(currentSum - target) < 0.001) { // 处理浮点数精度问题
+                    results.push([...path]);
+                    return;
+                }
+                
+                for (let i = start; i < numbers.length; i++) {
+                    const num = numbers[i];
+                    const newSum = currentSum + num;
+                    
+                    if (newSum > target + 0.001) continue; // 超过目标值，跳过
+                    
+                    path.push(num);
+                    backtrack(i + 1, path, newSum, currentDepth + 1);
+                    path.pop();
+                }
+            }
+            
+            backtrack(0, [], 0, 0); // 修改了初始深度值为0
+            return results;
+        }
+        
+        function removeDuplicateCombinations(combinations) {
+            const seen = new Set();
+            const uniqueCombinations = [];
+            
+            combinations.forEach(comb => {
+                // 对组合进行排序以便比较
+                const sorted = [...comb].sort((a, b) => a - b);
+                const key = sorted.join(',');
+                
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    uniqueCombinations.push(comb);
+                }
+            });
+            
+            return uniqueCombinations;
+        }
+    </script>
+</body>
+</html>
