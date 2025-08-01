@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数字组合查找器</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="file"], input[type="number"], textarea, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        /* 按钮样式优化 */
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            height: 36px;
+            min-width: 36px;
+            margin: 0 4px;
+        }
+        button:first-child {
+            margin-left: 0;
+        }
+        button:last-child {
+            margin-right: 0;
+        }
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-1px);
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        #stopBtn {
+            background-color: #f44336;
+        }
+        #stopBtn:hover {
+            background-color: #d32f2f;
+        }
+        .button-square {
+            width: 36px;
+            padding: 0;
+        }
+        
+        /* 输入框容器 */
+        .input-container {
+            display: flex;
+            align-items: center;
+        }
+        .input-container input {
+            flex: 1;
+            margin-right: 4px;
+        }
+        .input-container button {
+            margin: 0;
+        }
+        
+        /* 其他样式 */
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            min-height: 50px;
+        }
+        .success {
+            color: #4CAF50;
+        }
+        .error {
+            color: #f44336;
+        }
+        .tab-container {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .tab {
+            padding: 8px 12px;
+            background-color: #e0e0e0;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-right: 8px;
+            font-size: 14px;
+        }
+        .tab.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .progress-container {
+            margin-top: 10px;
+            display: none;
+        }
+        #progressBar {
+            width: 100%;
+            height: 20px;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        #progressFill {
+            height: 100%;
+            background-color: #4CAF50;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        #progressText {
+            margin-top: 5px;
+            font-size: 14px;
+            text-align: center;
+        }
+        .button-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .analysis-panel {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f5f5f5;
+            display: none;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .slider-container label {
+            margin-right: 10px;
+            min-width: 100px;
+        }
+        #frequencyCount {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        #frequencyCountValue {
+            min-width: 30px;
+            text-align: center;
+        }
+        .frequency-option {
+            margin: 10px 0;
+        }
+        .frequency-list {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+        .frequency-list li {
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+        .frequency-list li:hover {
+            text-decoration: underline;
+        }
+        .combination-item {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        .highlight {
+            font-weight: bold;
+            background-color: #ffff00;
+        }
+        .unique-count {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>数字组合查找器</h1>
+        
+        <div class="tab-container">
+            <div class="tab active" onclick="switchTab('fileTab')">上传文件</div>
+            <div class="tab" onclick="switchTab('pasteTab')">粘贴数据</div>
+        </div>
+        
+        <div id="fileTab" class="tab-content active">
+            <div class="form-group">
+                <label for="fileInput">上传数字文件（CSV/TXT/XLSX/XLS格式）：</label>
+                <input type="file" id="fileInput" accept=".csv,.txt,.xlsx,.xls">
+            </div>
+        </div>
+        
+        <div id="pasteTab" class="tab-content">
+            <div class="form-group">
+                <label for="pasteInput">直接粘贴数字（用逗号、空格或换行分隔）：</label>
+                <textarea id="pasteInput" placeholder="例如: 12.34, 56.78, 90.12 或每行一个数字"></textarea>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="target">目标结果：</label>
+            <input type="number" id="target" step="0.01" placeholder="输入目标金额">
+        </div>
+        
+        <div class="form-group">
+            <label for="depth">深度值（最多组合的数字个数，默认5）：</label>
+            <div class="input-container">
+                <input type="number" id="depth" min="1" value="5">
+                <button class="button-square" onclick="decreaseValue('depth')">-</button>
+                <button class="button-square" onclick="increaseValue('depth')">+</button>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="timeout">超时时间（秒，0表示不限制）：</label>
+            <div class="input-container">
+                <input type="number" id="timeout" min="0" value="10">
+                <button onclick="setNoTimeout()">不限时</button>
+                <button class="button-square" onclick="decreaseValue('timeout')">-</button>
+                <button class="button-square" onclick="increaseValue('timeout')">+</button>
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button id="findBtn">查找组合</button>
+            <button id="stopBtn" style="display:none;">停止</button>
+        </div>
+        
+        <div class="progress-container" id="progressContainer">
+            <div id="progressBar">
+                <div id="progressFill"></div>
+            </div>
+            <div id="progressText">计算中...</div>
+        </div>
+        
+        <div id="result"></div>
+        
+        <div class="analysis-panel" id="analysisPanel">
+            <h3>常用数字分析</h3>
+            <div class="slider-container">
+                <label for="frequencyCount">选择数量 (N):</label>
+                <input type="range" id="frequencyCount" min="1" max="5" value="3" step="1">
+                <span id="frequencyCountValue">3</span>
+            </div>
+            <div class="unique-count" id="uniqueCountInfo">不重复数字总数: 0</div>
+            <div class="frequency-option">
+                <label>分析选项:</label>
+                <select id="frequencyType">
+                    <option value="most">出现最多的N个数字</option>
+                    <option value="least">出现最少的N个数字</option>
+                </select>
+            </div>
+            <div class="button-group">
+                <button id="analyzeBtn">分析</button>
+            </div>
+            <div id="frequencyResult" class="frequency-list"></div>
+        </div>
+    </div>
+
+    <script>
+        // 创建Web Worker的代码
+        const workerCode = `
+            function findSumCombinations(numbers, target, maxDepth) {
+                const results = [];
+                let combinationsChecked = 0;
+                const totalCombinations = calculateTotalCombinations(numbers.length, maxDepth);
+                
+                function calculateTotalCombinations(n, k) {
+                    let total = 0;
+                    for (let i = 1; i <= k; i++) {
+                        total += combinations(n, i);
+                    }
+                    return total;
+                }
+                
+                function combinations(n, k) {
+                    if (k > n) return 0;
+                    if (k === 0 || k === n) return 1;
+                    return combinations(n - 1, k - 1) + combinations(n - 1, k);
+                }
+                
+                function backtrack(start, path, currentSum, currentDepth) {
+                    if (currentDepth > maxDepth) return;
+                    
+                    combinationsChecked++;
+                    
+                    if (combinationsChecked % 1000 === 0) {
+                        self.postMessage({
+                            type: 'progress',
+                            progress: combinationsChecked / totalCombinations
+                        });
+                    }
+                    
+                    if (Math.abs(currentSum - target) < 0.001) {
+                        results.push([...path]);
+                        return;
+                    }
+                    
+                    for (let i = start; i < numbers.length; i++) {
+                        const num = numbers[i];
+                        const newSum = currentSum + num;
+                        
+                        if (newSum > target + 0.001) continue;
+                        
+                        path.push(num);
+                        backtrack(i + 1, path, newSum, currentDepth + 1);
+                        path.pop();
+                    }
+                }
+                
+                backtrack(0, [], 0, 0);
+                return results;
+            }
+            
+            function removeDuplicateCombinations(combinations) {
+                const seen = new Set();
+                const uniqueCombinations = [];
+                
+                combinations.forEach(comb => {
+                    const sorted = [...comb].sort((a, b) => a - b);
+                    const key = sorted.join(',');
+                    
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        uniqueCombinations.push(comb);
+                    }
+                });
+                
+                return uniqueCombinations;
+            }
+            
+            self.onmessage = function(e) {
+                if (e.data.type === 'calculate') {
+                    const { numbers, target, depth } = e.data;
+                    const combinations = findSumCombinations(numbers, target, depth);
+                    const uniqueCombinations = removeDuplicateCombinations(combinations);
+                    
+                    self.postMessage({
+                        type: 'result',
+                        result: uniqueCombinations
+                    });
+                }
+            };
+        `;
+        
+        // 创建Blob URL用于Web Worker
+        const workerBlob = new Blob([workerCode], { type: 'application/javascript' });
+        const workerUrl = URL.createObjectURL(workerBlob);
+        
+        let worker = null;
+        let timeoutId = null;
+        let currentCombinations = [];
+        let currentNumbers = [];
+        let currentDepth = 5;
+        let currentHighlightedNumber = null;
+        let uniqueNumbersCount = 0;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('findBtn').addEventListener('click', findCombinations);
+            document.getElementById('stopBtn').addEventListener('click', stopCalculation);
+            document.getElementById('analyzeBtn').addEventListener('click', analyzeFrequency);
+            document.getElementById('frequencyCount').addEventListener('input', updateFrequencyCount);
+        });
+        
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+        
+        function updateFrequencyCount() {
+            const slider = document.getElementById('frequencyCount');
+            const valueSpan = document.getElementById('frequencyCountValue');
+            valueSpan.textContent = slider.value;
+        }
+        
+        function findCombinations() {
+            const target = parseFloat(document.getElementById('target').value);
+            currentDepth = parseInt(document.getElementById('depth').value) || 5;
+            const timeout = parseInt(document.getElementById('timeout').value) || 0;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = "准备计算...";
+            
+            document.getElementById('analysisPanel').style.display = 'none';
+            
+            if (isNaN(target)) {
+                resultDiv.innerHTML = '<span class="error">请输入有效的目标金额</span>';
+                return;
+            }
+            
+            document.getElementById('progressContainer').style.display = 'block';
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('progressText').textContent = '计算中...';
+            
+            document.getElementById('findBtn').disabled = true;
+            document.getElementById('stopBtn').style.display = 'inline-block';
+            
+            const activeTab = document.querySelector('.tab-content.active').id;
+            
+            if (activeTab === 'fileTab') {
+                processFile(target, currentDepth, timeout, resultDiv);
+            } else {
+                processPaste(target, currentDepth, timeout, resultDiv);
+            }
+        }
+        
+        function stopCalculation() {
+            if (worker) {
+                worker.terminate();
+                worker = null;
+            }
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+                timeoutId = null;
+            }
+            
+            document.getElementById('result').innerHTML = '<span class="error">计算已中止</span>';
+            resetUI();
+        }
+        
+        function resetUI() {
+            document.getElementById('findBtn').disabled = false;
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('progressContainer').style.display = 'none';
+        }
+        
+        function processFile(target, depth, timeout, resultDiv) {
+            const fileInput = document.getElementById('fileInput');
+            
+            if (!fileInput.files.length) {
+                resultDiv.innerHTML = '<span class="error">请先上传文件</span>';
+                resetUI();
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const fileType = file.name.split('.').pop().toLowerCase();
+            
+            if (['csv', 'txt'].includes(fileType)) {
+                processTextFile(file, target, depth, timeout, resultDiv);
+            } else if (['xlsx', 'xls'].includes(fileType)) {
+                processExcelFile(file, target, depth, timeout, resultDiv);
+            } else {
+                resultDiv.innerHTML = '<span class="error">不支持的文件格式</span>';
+                resetUI();
+            }
+        }
+        
+        function processTextFile(file, target, depth, timeout, resultDiv) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const content = e.target.result;
+                currentNumbers = parseNumbersFromText(content);
+                
+                if (currentNumbers.length === 0) {
+                    resultDiv.innerHTML = '<span class="error">文件中没有找到有效的数字</span>';
+                    resetUI();
+                    return;
+                }
+                
+                startCalculation(currentNumbers, target, depth, timeout, resultDiv);
+            };
+            
+            reader.onerror = function() {
+                resultDiv.innerHTML = '<span class="error">读取文件时出错</span>';
+                resetUI();
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        function processExcelFile(file, target, depth, timeout, resultDiv) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    currentNumbers = [];
+                    
+                    workbook.SheetNames.forEach(sheetName => {
+                        const worksheet = workbook.Sheets[sheetName];
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                        
+                        jsonData.forEach(row => {
+                            if (Array.isArray(row)) {
+                                row.forEach(cell => {
+                                    if (typeof cell === 'number') {
+                                        currentNumbers.push(cell);
+                                    } else if (typeof cell === 'string' && !isNaN(parseFloat(cell))) {
+                                        currentNumbers.push(parseFloat(cell));
+                                    }
+                                });
+                            }
+                        });
+                    });
+                    
+                    if (currentNumbers.length === 0) {
+                        resultDiv.innerHTML = '<span class="error">Excel文件中没有找到有效的数字</span>';
+                        resetUI();
+                        return;
+                    }
+                    
+                    startCalculation(currentNumbers, target, depth, timeout, resultDiv);
+                } catch (error) {
+                    resultDiv.innerHTML = `<span class="error">解析Excel文件时出错: ${error.message}</span>`;
+                    resetUI();
+                }
+            };
+            
+            reader.onerror = function() {
+                resultDiv.innerHTML = '<span class="error">读取文件时出错</span>';
+                resetUI();
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+        
+        function processPaste(target, depth, timeout, resultDiv) {
+            const pasteInput = document.getElementById('pasteInput').value.trim();
+            
+            if (!pasteInput) {
+                resultDiv.innerHTML = '<span class="error">请输入或粘贴数字</span>';
+                resetUI();
+                return;
+            }
+            
+            currentNumbers = parseNumbersFromText(pasteInput);
+            
+            if (currentNumbers.length === 0) {
+                resultDiv.innerHTML = '<span class="error">没有找到有效的数字</span>';
+                resetUI();
+                return;
+            }
+            
+            startCalculation(currentNumbers, target, depth, timeout, resultDiv);
+        }
+        
+        function parseNumbersFromText(text) {
+            const numbers = text
+                .replace(/[^\d.,-]/g, ' ')
+                .replace(/,/g, ' ')
+                .split(/\s+/)
+                .filter(item => item !== '')
+                .map(item => parseFloat(item))
+                .filter(num => !isNaN(num));
+            
+            return numbers;
+        }
+        
+        function startCalculation(numbers, target, depth, timeout, resultDiv) {
+            if (worker) {
+                worker.terminate();
+            }
+            
+            worker = new Worker(workerUrl);
+            
+            if (timeout > 0) {
+                timeoutId = setTimeout(() => {
+                    worker.terminate();
+                    worker = null;
+                    resultDiv.innerHTML = `<span class="error">计算超时（${timeout}秒），请尝试减少数字数量或降低深度值</span>`;
+                    resetUI();
+                }, timeout * 1000);
+            }
+            
+            worker.onmessage = function(e) {
+                if (e.data.type === 'progress') {
+                    const progress = Math.min(100, Math.round(e.data.progress * 100));
+                    document.getElementById('progressFill').style.width = progress + '%';
+                    document.getElementById('progressText').textContent = `计算中... ${progress}%`;
+                } else if (e.data.type === 'result') {
+                    if (timeoutId) {
+                        clearTimeout(timeoutId);
+                        timeoutId = null;
+                    }
+                    
+                    currentCombinations = e.data.result;
+                    displayResults(currentCombinations, numbers.length, target, depth, resultDiv);
+                    resetUI();
+                    
+                    if (currentCombinations.length > 1) {
+                        document.getElementById('analysisPanel').style.display = 'block';
+                    }
+                }
+            };
+            
+            worker.onerror = function(error) {
+                resultDiv.innerHTML = `<span class="error">计算错误: ${error.message}</span>`;
+                resetUI();
+            };
+            
+            worker.postMessage({
+                type: 'calculate',
+                numbers: numbers,
+                target: target,
+                depth: depth
+            });
+        }
+        
+        function displayResults(combinations, totalNumbers, target, depth, resultDiv) {
+            if (combinations.length > 0) {
+                const uniqueNumbers = new Set();
+                combinations.forEach(comb => {
+                    comb.forEach(num => {
+                        uniqueNumbers.add(num.toFixed(2));
+                    });
+                });
+                uniqueNumbersCount = uniqueNumbers.size;
+                
+                const frequencyCountSlider = document.getElementById('frequencyCount');
+                frequencyCountSlider.max = uniqueNumbersCount;
+                if (parseInt(frequencyCountSlider.value) > uniqueNumbersCount) {
+                    frequencyCountSlider.value = uniqueNumbersCount;
+                    document.getElementById('frequencyCountValue').textContent = uniqueNumbersCount;
+                }
+                
+                document.getElementById('uniqueCountInfo').textContent = `不重复数字总数: ${uniqueNumbersCount}`;
+                
+                let html = `<p class="success">在 ${totalNumbers} 个数字中找到 ${combinations.length} 种组合：</p><div>`;
+                combinations.forEach(comb => {
+                    const sum = comb.reduce((a, b) => a + b, 0);
+                    const combinationHtml = comb.map(num => {
+                        const numKey = num.toFixed(2);
+                        return `<span data-number="${numKey}">${num}</span>`;
+                    }).join(' + ');
+                    html += `<div class="combination-item">${combinationHtml} = ${sum.toFixed(2)}</div>`;
+                });
+                html += '</div>';
+                resultDiv.innerHTML = html;
+                
+                document.querySelectorAll('span[data-number]').forEach(span => {
+                    span.addEventListener('click', function() {
+                        highlightNumber(this.getAttribute('data-number'));
+                    });
+                });
+            } else {
+                resultDiv.innerHTML = `<span class="error">在深度 ${depth} 内没有找到相加等于 ${target.toFixed(2)} 的组合</span>`;
+            }
+        }
+        
+        function analyzeFrequency() {
+            const count = parseInt(document.getElementById('frequencyCount').value);
+            const type = document.getElementById('frequencyType').value;
+            const frequencyResult = document.getElementById('frequencyResult');
+            
+            if (currentCombinations.length === 0) {
+                frequencyResult.innerHTML = '<span class="error">没有可分析的组合</span>';
+                return;
+            }
+            
+            const frequencyMap = {};
+            currentCombinations.forEach(comb => {
+                comb.forEach(num => {
+                    const key = num.toFixed(2);
+                    frequencyMap[key] = (frequencyMap[key] || 0) + 1;
+                });
+            });
+            
+            let frequencyArray = Object.keys(frequencyMap).map(key => ({
+                number: key,
+                count: frequencyMap[key]
+            }));
+            
+            if (type === 'most') {
+                frequencyArray.sort((a, b) => b.count - a.count);
+            } else {
+                frequencyArray.sort((a, b) => a.count - b.count);
+            }
+            
+            const result = frequencyArray.slice(0, count);
+            
+            if (result.length > 0) {
+                let html = `<p>${type === 'most' ? '出现最多' : '出现最少'}的 ${count} 个数字：</p><ol>`;
+                result.forEach(item => {
+                    html += `<li data-number="${item.number}">${item.number} (出现 ${item.count} 次)</li>`;
+                });
+                html += '</ol>';
+                frequencyResult.innerHTML = html;
+                
+                document.querySelectorAll('#frequencyResult li[data-number]').forEach(li => {
+                    li.addEventListener('click', function() {
+                        highlightNumber(this.getAttribute('data-number'));
+                    });
+                });
+            } else {
+                frequencyResult.innerHTML = '<span class="error">没有找到符合条件的数字</span>';
+            }
+        }
+        
+        function highlightNumber(number) {
+            if (currentHighlightedNumber) {
+                document.querySelectorAll(`span[data-number="${currentHighlightedNumber}"]`).forEach(span => {
+                    span.classList.remove('highlight');
+                });
+            }
+            
+            if (currentHighlightedNumber === number) {
+                currentHighlightedNumber = null;
+                return;
+            }
+            
+            currentHighlightedNumber = number;
+            document.querySelectorAll(`span[data-number="${number}"]`).forEach(span => {
+                span.classList.add('highlight');
+            });
+        }
+        
+        function increaseValue(id) {
+            const input = document.getElementById(id);
+            input.value = parseInt(input.value) + 1;
+        }
+        
+        function decreaseValue(id) {
+            const input = document.getElementById(id);
+            const newValue = parseInt(input.value) - 1;
+            if (newValue >= parseInt(input.min)) {
+                input.value = newValue;
+            }
+        }
+        
+        function setNoTimeout() {
+            const timeoutInput = document.getElementById('timeout');
+            timeoutInput.value = timeoutInput.value === '0' ? '10' : '0';
+        }
+    </script>
+</body>
+</html>
