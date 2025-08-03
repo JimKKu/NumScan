@@ -8,8 +8,12 @@
 
 - 截图（数据均为假数据）：
 
+<div style="width: 100%;display: flex">
+<img src="./README/img1.png" style="width: 400px;border-radius:10px" />
+<img src="./README/img2.png" style="width: 400px;border-radius:10px" />
+</div>
 
-![IMG1](README/img3.gif)
+<img src="README/img3.gif" style="width: 800px"/>
 
 ## 开发背景
 由于我的**财会朋友**经常需要从一堆交易金额中寻找出相加为N的值，因此催生出了本页面，本页面前期为一个Python脚本（见`py`文件夹下的内容），仅能寻找一个结果（找到立刻Break），后面由于财会朋友找我帮忙的频率很高，因此催生出来了使用更加简单的网页版本。
