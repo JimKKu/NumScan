@@ -9,9 +9,9 @@
 - 截图（数据均为假数据）：
 
 <div style="width: 100%;display: flex">
-<img src="./README/img3.gif" style="width: 266px;border-radius:10px" />
 <img src="./README/img1.png" style="width: 266px;border-radius:10px" />
 <img src="./README/img2.png" style="width: 266px;border-radius:10px" />
+<img src="./README/img3.gif" style="width: 266px;border-radius:10px" />
 </div>
 
 ## 开发背景
