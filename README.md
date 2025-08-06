@@ -72,3 +72,14 @@
 python3  b.py    a.xlsz 321.12 --max_r=6
 ```
 
+# 部署
+
+尽管这是一个非常简单的项目，但是你仍然可以亲自部署，在已经安装 Docker 的服务器上执行下列命令，可以快速部署：
+
+
+```bash
+docker run -it --name JimKKu-NumScan --restart always -p 80:80 -d jimkku/numscan
+```
+
+
+若是想通过 NGINX 托管，可以将 index.html 文件保存至 NGINX 托管目录即可。
