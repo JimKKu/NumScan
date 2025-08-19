@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>脚本托管平台 | 高效脚本存储与分发</title>
+    <style>
+        :root {
+            --primary-color: #6e45e2;
+            --secondary-color: #88d3ce;
+            --dark-bg: #0f0c29;
+            --light-bg: #1a1a40;
+            --text-color: #e6f1ff;
+            --code-color: #00ffaa;
+            --subtitle-color: #a0a0a0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(110, 69, 226, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(136, 211, 206, 0.15) 0%, transparent 50%);
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+        
+        header {
+            padding: 80px 0 50px;
+            position: relative;
+        }
+        
+        .logo {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: inline-block;
+        }
+        
+        .tagline {
+            font-size: 1.4rem;
+            opacity: 0.9;
+            margin-bottom: 40px;
+            line-height: 1.8;
+        }
+        
+        .description {
+            background: var(--light-bg);
+            border-radius: 12px;
+            padding: 40px;
+            margin: 60px 0;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: left;
+        }
+        
+        .description h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: white;
+            text-align: center;
+        }
+        
+        /* 命令展示区块样式 */
+        .command-section {
+            margin: 30px 0;
+        }
+        
+        .command-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+        }
+        
+        .command-title:before {
+            content: ">";
+            color: var(--primary-color);
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        .command-code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            overflow-x: auto;
+            color: var(--code-color);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .subtitle {
+            color: var(--subtitle-color);
+            font-size: 0.9rem;
+            text-align: right;
+            margin-top: 10px;
+            font-style: italic;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 40px 0;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            margin-top: 60px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2.2rem;
+            }
+            
+            .tagline {
+                font-size: 1.1rem;
+            }
+            
+            .description {
+                padding: 30px;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="logo">脚本托管平台</h1>
+            <p class="tagline">高效 · 安全 · 稳定的脚本存储与分发服务</p>
+        </header>
+        
+        <main>
+            <div class="description">
+                <h2>平台简介</h2>
+                <p>本平台专注于各类脚本文件的托管与分发，支持Shell、Python、JavaScript等多种脚本语言。</p>
+                
+                <!-- 示例1：Shell脚本 -->
+                <div class="command-section">
+                    <div class="command-title">通过curl下载并执行Shell脚本</div>
+                    <div class="command-code">
+curl -sSL https://your-domain.com/scripts/setup.sh | bash
+curl -sSL https://your-domain.com/scripts/deploy.sh | bash -s -- --env=production
+                    </div>
+                    <p class="subtitle">提供便捷脚本下载执行方式</p>
+                </div>
+                
+                <!-- 示例2：Python脚本 -->
+                <div class="command-section">
+                    <div class="command-title">使用wget下载Python脚本</div>
+                    <div class="command-code">
+wget https://your-domain.com/scripts/data_processor.py
+python3 data_processor.py --input=data.csv --output=result.json
+python3 &lt;(curl -sSL https://your-domain.com/scripts/quick_check.py)
+                    </div>
+                    <p class="subtitle">支持多种Python脚本运行方式</p>
+                </div>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">10TB+</div>
+                    <div class="stat-label">存储容量</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">99.9%</div>
+                    <div class="stat-label">可用性</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">1Gbps</div>
+                    <div class="stat-label">传输速度</div>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>© 2023 脚本托管平台 | 由Nginx强力驱动</p>
+            <p>开发者首选脚本存储与分发解决方案</p>
+        </footer>
+    </div>
+</body>
+</html>

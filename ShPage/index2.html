@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>静态资源托管 | 文件存储服务</title>
+    <style>
+        :root {
+            --primary-color: #6e45e2;
+            --secondary-color: #88d3ce;
+            --dark-bg: #0f0c29;
+            --light-bg: #1a1a40;
+            --text-color: #e6f1ff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(110, 69, 226, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(136, 211, 206, 0.15) 0%, transparent 50%);
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+        
+        header {
+            padding: 80px 0 50px;
+            position: relative;
+        }
+        
+        .logo {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: inline-block;
+        }
+        
+        .tagline {
+            font-size: 1.4rem;
+            opacity: 0.9;
+            margin-bottom: 40px;
+            line-height: 1.8;
+        }
+        
+        .description {
+            background: var(--light-bg);
+            border-radius: 12px;
+            padding: 40px;
+            margin: 60px 0;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: left;
+        }
+        
+        .description h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: white;
+            text-align: center;
+        }
+        
+        .description p {
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 40px 0;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            margin-top: 60px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2.2rem;
+            }
+            
+            .tagline {
+                font-size: 1.1rem;
+            }
+            
+            .description {
+                padding: 30px;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="logo">静态资源托管</h1>
+            <p class="tagline">高效 · 安全 · 稳定的文件存储服务<br>基于Nginx构建的极速静态资源托管平台</p>
+        </header>
+        
+        <main>
+            <div class="description">
+                <h2>服务简介</h2>
+                <p>本平台提供静态资源托管服务，支持各种类型的文件存储与分发，包括但不限于：</p>
+                <p>• 脚本文件（JS/CSS/Shell等）</p>
+                <p>• 图像资源（JPG/PNG/SVG等）</p>
+                <p>• 多媒体文件（MP4/MP3/PDF等）</p>
+                <p>所有文件通过标准HTTP协议访问，支持直接下载和引用。</p>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">1024GB+</div>
+                    <div class="stat-label">存储容量</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">99.9%</div>
+                    <div class="stat-label">可用性</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">3,000,000bit/s</div>
+                    <div class="stat-label">传输速度</div>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>© 2023 静态资源托管服务 | 由Nginx强力驱动</p>
+            <p>简单 · 可靠 · 高性能文件存储解决方案</p>
+        </footer>
+    </div>
+</body>
+</html>
